@@ -1,84 +1,48 @@
-        <!-- Single Product Start -->
-        <div class="container-fluid py-5" style="margin-top: 100px;">
-            <div class="container py-5">
-                <div class="row g-4 mb-5">
-                    <div class="col-lg-8 col-xl-12">
-                        <div class="row g-4">
-                            <div class="col-lg-6">
-                                <div class="border rounded">
-                                    <a href="#">
-                                        <img src="img/single-item.jpg" class="img-fluid rounded" alt="Image">
-                                    </a>
-                                </div>
-                            </div>
-                            <div class="col-lg-6">
-                                <h4 class="fw-bold mb-3">Brocoli</h4>
-                                <p class="mb-3">Category: Vegetables</p>
-                                <h5 class="fw-bold mb-3">3,35 $</h5>
-                                <div class="d-flex mb-4">
-                                    <i class="fa fa-star text-secondary"></i>
-                                    <i class="fa fa-star text-secondary"></i>
-                                    <i class="fa fa-star text-secondary"></i>
-                                    <i class="fa fa-star text-secondary"></i>
-                                    <i class="fa fa-star"></i>
-                                </div>
-                                <p class="mb-4">The generated Lorem Ipsum is therefore always free from repetition injected humour, or non-characteristic words etc.</p>
-                                <p class="mb-4">Susp endisse ultricies nisi vel quam suscipit. Sabertooth peacock flounder; chain pickerel hatchetfish, pencilfish snailfish</p>
-                                <div class="input-group quantity mb-5" style="width: 100px;">
-                                    <div class="input-group-btn">
-                                        <button class="btn btn-sm btn-minus rounded-circle bg-light border" >
-                                            <i class="fa fa-minus"></i>
-                                        </button>
-                                    </div>
-                                    <input type="text" class="form-control form-control-sm text-center border-0" value="1">
-                                    <div class="input-group-btn">
-                                        <button class="btn btn-sm btn-plus rounded-circle bg-light border">
-                                            <i class="fa fa-plus"></i>
-                                        </button>
-                                    </div>
-                                </div>
-                                <a href="#" class="btn border border-secondary rounded-pill px-4 py-2 mb-4 text-primary"><i class="fa fa-shopping-bag me-2 text-primary"></i> Add to cart</a>
-                            </div>
-                            
-                            <form action="#">
-                                <h4 class="mb-5 fw-bold">Leave a Reply</h4>
-                                <div class="row g-4">
-                                    <div class="col-lg-6">
-                                        <div class="border-bottom rounded">
-                                            <input type="text" class="form-control border-0 me-4" placeholder="Yur Name *">
-                                        </div>
-                                    </div>
-                                    <div class="col-lg-6">
-                                        <div class="border-bottom rounded">
-                                            <input type="email" class="form-control border-0" placeholder="Your Email *">
-                                        </div>
-                                    </div>
-                                    <div class="col-lg-12">
-                                        <div class="border-bottom rounded my-4">
-                                            <textarea name="" id="" class="form-control border-0" cols="30" rows="8" placeholder="Your Review *" spellcheck="false"></textarea>
-                                        </div>
-                                    </div>
-                                    <div class="col-lg-12">
-                                        <div class="d-flex justify-content-between py-3 mb-5">
-                                            <div class="d-flex align-items-center">
-                                                <p class="mb-0 me-3">Please rate:</p>
-                                                <div class="d-flex align-items-center" style="font-size: 12px;">
-                                                    <i class="fa fa-star text-muted"></i>
-                                                    <i class="fa fa-star"></i>
-                                                    <i class="fa fa-star"></i>
-                                                    <i class="fa fa-star"></i>
-                                                    <i class="fa fa-star"></i>
-                                                </div>
-                                            </div>
-                                            <a href="#" class="btn border border-secondary text-primary rounded-pill px-4 py-3"> Post Comment</a>
-                                        </div>
-                                    </div>
-                                </div>
-                            </form>
-                        </div>
-                    </div>
-                    
+<?php
+require_once __DIR__ . '/../admin/conf.php';
+
+if (!isset($_GET['id']) || !is_numeric($_GET['id'])) {
+    die('Invalid product ID.');
+}
+
+$id = (int)$_GET['id'];
+
+$stmt = $conn->prepare("SELECT * FROM product WHERE id = ?");
+$stmt->execute([$id]);
+$product = $stmt->fetch(PDO::FETCH_ASSOC);
+
+if (!$product) {
+    die('Product not found.');
+}
+?>
+<style>
+    img{
+        width: 500px;
+        height: 500px;
+    }
+</style>
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title><?= htmlspecialchars($product['name']) ?> | Detail</title>
+    <link rel="stylesheet" href="your-bootstrap.css">
+</head>
+<body>
+    <div class="container-fluid py-5" style="margin-top: 100px;">
+        <div class="container py-5">
+            <div class="row g-4 mb-5">
+                <div class="col-lg-6">
+                    <img src="admin/uploaded_img/<?= htmlspecialchars($product['image']) ?>" class="img-fluid rounded" alt="<?= htmlspecialchars($product['name']) ?>">
+                </div>
+                <div class="col-lg-6">
+                    <h4 class="fw-bold mb-3"><?= htmlspecialchars($product['name']) ?></h4>
+                    <h5 class="fw-bold mb-3">$<?= number_format($product['price'], 2) ?></h5>
+                    <a href="#" class="btn btn-primary">Add to Cart</a>
                 </div>
             </div>
         </div>
-        <!-- Single Product End -->
+    </div>
+</body>
+</html>

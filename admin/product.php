@@ -5,7 +5,6 @@ $message = [];
 
 // Add Product
 if (isset($_POST['add_product'])) {
-    $product_id = $_POST['product_id'];
     $product_name = $_POST['product_name'];
     $product_price = $_POST['product_price'];
     $product_image = $_FILES['product_image']['name'];
@@ -13,12 +12,12 @@ if (isset($_POST['add_product'])) {
     $product_image_folder = 'uploaded_img/' . $product_image;
     $category_id = !empty($_POST['category_id']) ? $_POST['category_id'] : null;
 
-    if (empty($product_id) || empty($product_name) || empty($product_price) || empty($product_image)) {
-        $message[] = 'Please fill out all fields for the product';
+    if (empty($product_name) || empty($product_price) || empty($product_image)) {
+        $message[] = 'Please fill out all required fields for the product';
     } else {
         try {
-            $stmt = $conn->prepare("INSERT INTO product (id, name, price, image, category_id) VALUES (:id, :name, :price, :image, :category_id)");
-            $stmt->bindParam(':id', $product_id);
+            $stmt = $conn->prepare("INSERT INTO product (name, price, image, category_id) VALUES (:name, :price, :image, :category_id)");
+
             $stmt->bindParam(':name', $product_name);
             $stmt->bindParam(':price', $product_price);
             $stmt->bindParam(':image', $product_image);
@@ -33,13 +32,7 @@ if (isset($_POST['add_product'])) {
     }
 }
 ?>
-<?php
-if (isset($message)) {
-    foreach ($message as $msg) {
-        echo '<span class="message">' . $msg . '</span>';
-    }
-}
-?>
+
 
 <div class="container">
     <div class="main" style="margin-left: 10px;">
@@ -47,7 +40,6 @@ if (isset($message)) {
         <div class="admin-product-form-container">
             <form action="" method="post" enctype="multipart/form-data">
                 <h3>Add a New Product</h3>
-                <input type="text" placeholder="Enter product id" name="product_id" class="box">
                 <input type="text" placeholder="Enter product name" name="product_name" class="box">
                 <input type="number" step="0.01" placeholder="Enter product price" name="product_price" class="box">
                 <input type="file" accept="image/png, image/jpeg, image/jpg" name="product_image" class="box">
@@ -73,7 +65,6 @@ if (isset($message)) {
             <table>
                 <thead>
                     <tr>
-                        <th>Product ID</th>
                         <th>Product Name</th>
                         <th>Price</th>
                         <th>Image</th>
@@ -98,7 +89,7 @@ if (isset($message)) {
                         }
                         ?>
                         <tr>
-                            <td><?= htmlspecialchars($row['id']) ?></td>
+                           
                             <td><?= htmlspecialchars($row['name']) ?></td>
                             <td><?= htmlspecialchars($row['price']) ?></td>
                             <td><img src="uploaded_img/<?= htmlspecialchars($row['image']) ?>" width="50" height="50"></td>

@@ -48,16 +48,16 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
 <title>Login - Tidi</title>
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" />
 <style>
-    * { box-sizing: border-box; margin: 0; padding: 0; font-family: Arial, sans-serif; }
+    * { box-sizing: border-box; margin: 0; padding: 0; font-family: Arial, sans-serif;  }
     .main-content { width: 50%; border-radius: 20px; box-shadow: 0 5px 5px rgba(0,0,0,.4); margin: 5em auto; display: flex; overflow: hidden; }
-    .company__info { background-color: #008080; border-top-left-radius: 20px; border-bottom-left-radius: 20px; display: flex; flex-direction: column; justify-content: center; align-items: center; color: #fff; padding: 2em; width: 40%; }
+    .company__info { background-color: #81C408; border-top-left-radius: 20px; border-bottom-left-radius: 20px; display: flex; flex-direction: column; justify-content: center; align-items: center; color: #fff; padding: 2em; width: 40%; }
     .fa-android { font-size: 3em; }
     .login_form { background-color: #fff; border-top-right-radius: 20px; border-bottom-right-radius: 20px; border-left: 1px solid #ccc; padding: 2em; width: 60%; }
     form { width: 100%; }
     .form__input { width: 100%; padding: 12px; margin-bottom: 15px; border-radius: 30px; border: 1px solid #ccc; }
-    .form__input:focus { outline: none; border-color: #008080; }
-    .btn { width: 100%; padding: 12px; background-color: #008080; color: #fff; border: none; border-radius: 30px; font-size: 16px; cursor: pointer; margin-top: 10px; }
-    .btn:hover { background-color: #006666; }
+    .form__input:focus { outline: none; border-color: #81C408; }
+    .btn { width: 100%; padding: 12px; background-color: #81C408; color: #fff; border: none; border-radius: 30px; font-size: 16px; cursor: pointer; margin-top: 10px; }
+    .btn:hover { background-color: #FEB999; }
     .message {
         text-align: center;
         margin-bottom: 10px;
@@ -74,16 +74,18 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
     @media screen and (min-width: 641px) and (max-width: 800px) {
         .main-content { width: 70%; }
     }
-    h2 { color: #008080; text-align: center; margin-bottom: 20px; }
+    h2 { color: #81C408; text-align: center; margin-bottom: 20px; }
+    .card{
+        margin-top: 100px;
+    }
 </style>
 </head>
 <body>
-<div class="main-content">
+    <div class="card">
+        <div class="main-content " >
     <div class="company__info">
-        <h2><i class="fa fa-android"></i></h2>
-        <h4 class="company_title">Tidi</h4>
     </div>
-    <div class="login_form">
+    <div class="login_form" >
         <h2>Log In</h2>
 
         <?php if (!empty($messages)): ?>
@@ -113,15 +115,13 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
             <input type="hidden" name="csrf_token" />
             <button type="submit" class="btn">Log In</button>
         </form>
-
-        <p style="text-align:center; margin-top:10px;">
-            <a href="#">Forgot Password?</a>
-        </p>
         <p style="text-align:center; margin-top:15px;">
             Don't have an account?
-            <a href="index.php?p=register" style="color: #008080;">Register here</a>
+            <a href="index.php?p=register" style="color: #FEB999;">Register here</a>
         </p>
     </div>
 </div>
+</div>
+
 </body>
 </html>
