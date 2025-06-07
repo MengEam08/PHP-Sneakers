@@ -48,9 +48,9 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
 <title>Login - Tidi</title>
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" />
 <style>
-    * { box-sizing: border-box; margin: 0; padding: 0; font-family: Arial, sans-serif;  }
+   
     .main-content { width: 50%; border-radius: 20px; box-shadow: 0 5px 5px rgba(0,0,0,.4); margin: 5em auto; display: flex; overflow: hidden; }
-    .company__info { background-color: #81C408; border-top-left-radius: 20px; border-bottom-left-radius: 20px; display: flex; flex-direction: column; justify-content: center; align-items: center; color: #fff; padding: 2em; width: 40%; }
+    .company__info { background-color: #81C408; border-top-left-radius: 20px; border-bottom-left-radius: 20px; display: flex; flex-direction: column; justify-content: center; align-items: center; color: #fff; padding: 2em; width: 30%; }
     .fa-android { font-size: 3em; }
     .login_form { background-color: #fff; border-top-right-radius: 20px; border-bottom-right-radius: 20px; border-left: 1px solid #ccc; padding: 2em; width: 60%; }
     form { width: 100%; }

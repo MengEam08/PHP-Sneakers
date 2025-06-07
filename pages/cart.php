@@ -44,7 +44,7 @@ $grandTotal = $total + $shipping;
         position: fixed;
         top: 20px;
         right: 20px;
-        background-color: #81C408;
+        background-color: #FEB424;
         color: white;
         padding: 15px 25px;
         border-radius: 8px;

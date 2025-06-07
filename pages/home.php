@@ -8,7 +8,7 @@
     <?php include './components/shopStart.php'; ?>
     <?php include './components/featureStart.php'; ?>
     <?php include './components/bannerSection.php'; ?>
-    <?php include './components/bestSeller.php'; ?>
+    <?php include './components/content.php'; ?>
     
 
 </body>

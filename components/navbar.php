@@ -32,7 +32,7 @@ $cart_count = $row['cart_count'] ?? 0;
                 <div class="navbar-nav mx-auto">
                     <a href="index.php" class="nav-item nav-link <?= $p === 'home' ? 'active' : '' ?>">Home</a>
                     <a href="index.php?p=shop" class="nav-item nav-link <?= $p === 'shop' ? 'active' : '' ?>">Shop</a>
-                    <a href="contact.php" class="nav-item nav-link">Contact</a>
+                    <a href="index.php?p=contact" class="nav-item nav-link">Contact</a>
                     <!-- <a href="index.php?p=404" class="dropdown-item">404 Page</a> -->
                 </div>
                 <div class="d-flex m-3 me-0">

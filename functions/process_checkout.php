@@ -1,42 +1,65 @@
 <?php
 session_start();
-require_once __DIR__ . '/../admin/conf.php';
+require_once __DIR__ . '/../admin/conf.php'; // uses $conn as PDO
 
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
-
     $mobile = trim($_POST['mobile']);
     $email = trim($_POST['email']);
     $user_id = $_SESSION['user_id'] ?? null;
     $status = "Pending";
 
-    if (!isset($_SESSION['cart']) || empty($_SESSION['cart'])) {
-        die('Cart is empty.');
+    if (!$user_id) {
+        die("User not logged in.");
+    }
+
+    // Get cart items for this user
+    $cart_stmt = $conn->prepare("
+        SELECT c.product_id, c.quantity, p.price
+        FROM cart c
+        JOIN product p ON c.product_id = p.id
+        WHERE c.user_id = :user_id
+    ");
+    $cart_stmt->execute(['user_id' => $user_id]);
+    $cart_items = $cart_stmt->fetchAll();
+
+    if (empty($cart_items)) {
+        die("Cart is empty.");
     }
 
     $totalAmount = 0;
 
-    /** @var mysqli_stmt $stmt */
-    $stmt = $conn->prepare("INSERT INTO sales 
+    // Prepare the insert into sales
+    $insert_stmt = $conn->prepare("
+        INSERT INTO sales 
         (user_id, product_id, quantity, total_price, sale_date, status, mobile, email, total_amount)
-        VALUES (?, ?, ?, ?, NOW(), ?, ?, ?, ?)");
+        VALUES (:user_id, :product_id, :quantity, :total_price, NOW(), :status, :mobile, :email, :total_amount)
+    ");
 
-    foreach ($_SESSION['cart'] as $item) {
+    foreach ($cart_items as $item) {
         $product_id = $item['product_id'];
         $quantity = $item['quantity'];
         $price = $item['price'];
         $total_price = $price * $quantity;
         $totalAmount += $total_price;
 
-        $stmt->bind_param("iiidssssd", $user_id, $product_id, $quantity, $total_price, $status, $mobile, $email, $totalAmount);
-
-        if (!$stmt->execute()) {
-            die("Insert failed: " . $stmt->error);
-        }
+        $insert_stmt->execute([
+            'user_id' => $user_id,
+            'product_id' => $product_id,
+            'quantity' => $quantity,
+            'total_price' => $total_price,
+            'status' => $status,
+            'mobile' => $mobile,
+            'email' => $email,
+            'total_amount' => $totalAmount
+        ]);
     }
 
-    $stmt->close();
-    unset($_SESSION['cart']);
-    header("Location: thank_you.php");
+    // Optional: clear cart
+    $delete_cart = $conn->prepare("DELETE FROM cart WHERE user_id = :user_id");
+    $delete_cart->execute(['user_id' => $user_id]);
+
+    // Redirect after success
+    header("Location: ../dashboard.php");
     exit;
 
 } else {
