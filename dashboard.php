@@ -62,7 +62,6 @@ try {
             s.product_id,
             s.quantity,
             s.total_price,
-            s.total_amount,
             s.status,
             s.mobile,
             s.email,
@@ -169,7 +168,6 @@ try {
                       <th>Product Name</th>
                       <th>Quantity</th>
                       <th>Price</th>
-                      <th>Amount</th>
                       <th>Status</th>
                       <th>Mobile</th>
                       <th>Email</th>
@@ -182,7 +180,6 @@ try {
                         <td><?= htmlspecialchars($sale['product_name']) ?></td>
                         <td><?= htmlspecialchars($sale['quantity']) ?></td>
                         <td>$<?= number_format($sale['total_price'], 2) ?></td>
-                        <td>$<?= number_format($sale['total_amount'], 2) ?></td>
                         <td><?= htmlspecialchars($sale['status']) ?></td>
                         <td><?= htmlspecialchars($sale['mobile']) ?></td>
                         <td><?= htmlspecialchars($sale['email']) ?></td>

@@ -1,96 +1,44 @@
 <?php
 require_once 'conf.php';
-
 $messages = [];
 
-if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['add_category'])) {
-    $category_name = trim($_POST['category_name']);
-    $category_image = $_FILES['category_image']['name'];
-    $category_image_tmp = $_FILES['category_image']['tmp_name'];
-    $category_image_folder = 'uploaded_img/' . $category_image;
+// Handle POST request for status update
+if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['update_status'], $_POST['sale_id'])) {
+    $sale_id = $_POST['sale_id'];
+    $new_status = $_POST['update_status'];
 
-    if (empty($category_name) || empty($category_image)) {
-        $messages[] = ['type' => 'danger', 'text' => 'Please fill out all fields for the category.'];
+    $stmt = $conn->prepare("UPDATE sales SET status = :status WHERE id = :id");
+    if ($stmt->execute([':status' => $new_status, ':id' => $sale_id])) {
+        $messages[] = ['type' => 'success', 'text' => "Status updated successfully for Sale ID $sale_id."];
     } else {
-        try {
-            $stmt = $conn->prepare("INSERT INTO category (name, image) VALUES (:name, :image)");
-            $stmt->bindParam(':name', $category_name);
-            $stmt->bindParam(':image', $category_image);
-
-            if ($stmt->execute()) {
-                move_uploaded_file($category_image_tmp, $category_image_folder);
-                $messages[] = ['type' => 'success', 'text' => 'New category added successfully.'];
-            } else {
-                $messages[] = ['type' => 'danger', 'text' => 'Could not add the category.'];
-            }
-        } catch (PDOException $e) {
-            $messages[] = ['type' => 'danger', 'text' => 'Database error: ' . $e->getMessage()];
-        }
+        $messages[] = ['type' => 'danger', 'text' => "Failed to update status."];
     }
 }
+
+// Fetch all sales
+$stmt = $conn->query("SELECT * FROM sales ORDER BY sale_date DESC");
+$sales = $stmt->fetchAll(PDO::FETCH_ASSOC);
 ?>
 
 <!DOCTYPE html>
 <html lang="en">
 <head>
   <meta charset="UTF-8">
-  <title>Add Category</title>
+  <title>Sales List</title>
   <style>
     h4 {
       margin-bottom: 20px;
       color: #333;
     }
 
-    .form-label {
-      font-weight: 600;
-      margin-bottom: 5px;
-      display: inline-block;
-    }
-
-    .form-control {
-      width: 100%;
-      padding: 10px;
-      margin-bottom: 15px;
-      border: 1px solid #ccc;
-      border-radius: 5px;
-      font-size: 1rem;
-    }
-
-    .btn-success {
-      padding: 10px;
-      font-size: 16px;
-      border: none;
-      border-radius: 5px;
-      background-color: #e89d2e;
-      color: white;
-      cursor: pointer;
-      transition: background-color 0.3s;
-    }
-
-    .btn-success:hover {
-      background-color: #c97902;
-    }
-
     .alert {
       padding: 15px;
       border-radius: 5px;
       margin-bottom: 20px;
-      font-size: 14px;
     }
 
-    .alert-success {
-      background-color: #d4edda;
-      color: #155724;
-    }
-
-    .alert-danger {
-      background-color: #f8d7da;
-      color: #721c24;
-    }
-
-    .main {
-      margin: 20px;
-    }
+    .alert-success { background-color: #d4edda; color: #155724; }
+    .alert-danger { background-color: #f8d7da; color: #721c24; }
 
     table {
       width: 100%;
@@ -105,58 +53,133 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['add_category'])) {
     }
 
     th {
-      background-color: #e89d2e;
+      background-color: #FEB424;
       color: white;
     }
 
-    img {
-      border-radius: 5px;
-    }
-
-    .btn-delete {
-      background-color: #dc3545;
-      color: white;
+    .form-select {
       padding: 6px 10px;
+      border-radius: 3px;
+      font-size: 14px;
+    }
+
+    .btn-submit {
+      padding: 6px 10px;
+      background-color: #FEB424;
+      color: white;
       border: none;
       border-radius: 3px;
       cursor: pointer;
     }
 
-    .btn-delete:hover {
-      background-color: #b02a37;
+    .btn-submit:hover {
+      background-color: #0056b3;
     }
+     .toast-container {
+    position: fixed;
+    top: 20px;
+    right: 20px;
+    z-index: 9999;
+  }
+
+  .toast {
+    display: flex;
+    align-items: center;
+    background-color: #333;
+    color: #fff;
+    padding: 12px 18px;
+    margin-bottom: 10px;
+    border-radius: 5px;
+    min-width: 250px;
+    box-shadow: 0 2px 6px rgba(0, 0, 0, 0.2);
+    opacity: 0.95;
+    animation: slideIn 0.3s ease, fadeOut 0.5s ease 3s forwards;
+  }
+
+  .toast-success { background-color: #28a745; }
+  .toast-danger { background-color: #dc3545; }
+
+  @keyframes slideIn {
+    from { transform: translateX(100%); }
+    to { transform: translateX(0); }
+  }
+
+  @keyframes fadeOut {
+    to { opacity: 0; transform: translateX(100%); }
+  }
   </style>
 </head>
 <body>
 
 <div class="container">
   <div class="main">
-    <div class="mt-4">
-      <h4>Order List</h4>
-      <table>
-        <thead>
+    <h4>Sales List</h4>
+
+    <!-- Alerts -->
+    <?php foreach ($messages as $msg): ?>
+      <div class="alert alert-<?php echo $msg['type']; ?>">
+        <?php echo $msg['text']; ?>
+      </div>
+    <?php endforeach; ?>
+
+    <!-- Sales Table -->
+    <table>
+      <thead>
+        <tr>
+          <th>ID</th>
+          <th>User ID</th>
+          <th>Product ID</th>
+          <th>Quantity</th>
+          <th>Total Price</th>
+          <th>Sale Date</th>
+          <th>Status</th>
+          <th>Mobile</th>
+          <th>Email</th>
+        </tr>
+      </thead>
+      <tbody style="background-color: #E7F2CE;">
+        <?php foreach ($sales as $sale): ?>
           <tr>
-            <th>Category Name</th>
-            <th>Image</th>
-            <th>Action</th>
+            <td><?php echo $sale['id']; ?></td>
+            <td><?php echo $sale['user_id']; ?></td>
+            <td><?php echo $sale['product_id']; ?></td>
+            <td><?php echo $sale['quantity']; ?></td>
+            <td>$<?php echo number_format($sale['total_price'], 2); ?></td>
+            <td><?php echo $sale['sale_date']; ?></td>
+            <td>
+              <form method="POST" style="display: flex; gap: 5px; align-items: center;">
+                <input type="hidden" name="sale_id" value="<?php echo $sale['id']; ?>">
+                <select name="update_status" class="form-select">
+                  <option value="Pending" <?php echo $sale['status'] === 'Pending' ? 'selected' : ''; ?>>Pending</option>
+                  <option value="Paid" <?php echo $sale['status'] === 'Paid' ? 'selected' : ''; ?>>Paid</option>
+                </select>
+                <button type="submit" class="btn-submit">Update</button>
+              </form>
+            </td>
+            <td><?php echo htmlspecialchars($sale['mobile']); ?></td>
+            <td><?php echo htmlspecialchars($sale['email']); ?></td>
           </tr>
-        </thead>
-        <tbody>
-          <?php
-          $stmt = $conn->query("SELECT * FROM category ORDER BY id DESC");
-          while ($row = $stmt->fetch(PDO::FETCH_ASSOC)) {
-              echo '<tr>';
-              echo '<td>' . htmlspecialchars($row['name']) . '</td>';
-              echo '<td><img src="uploaded_img/' . htmlspecialchars($row['image']) . '" width="50" height="50" alt="Category Image"></td>';
-              echo '<td><a href="admin_page.php?delete=' . $row['id'] . '" class="btn-delete" onclick="return confirm(\'Are you sure?\')"><ion-icon name="trash-bin-outline"></ion-icon></a></td>';
-              echo '</tr>';
-          }
-          ?>
-        </tbody>
-      </table>
-    </div>
+        <?php endforeach; ?>
+      </tbody>
+    </table>
+
   </div>
 </div>
+<?php if (!empty($messages)): ?>
+  <div class="toast-container" id="toastContainer">
+    <?php foreach ($messages as $msg): ?>
+      <div class="toast toast-<?php echo $msg['type']; ?>">
+        <?php echo json_encode($msg['text']); ?>
+      </div>
+    <?php endforeach; ?>
+  </div>
+<?php endif; ?>
+<script>
+  setTimeout(() => {
+    const container = document.getElementById('toastContainer');
+    if (container) container.remove();
+  }, 4000); // remove after 4s
+</script>
 
 </body>
 </html>

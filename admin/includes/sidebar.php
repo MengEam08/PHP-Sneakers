@@ -49,7 +49,7 @@
               <span class="icon">
               <ion-icon name="copy-outline"></ion-icon>
               </span>
-              <span class="title">Orders</span>
+              <span class="title">Sales</span>
             </a>
           </li>
 
