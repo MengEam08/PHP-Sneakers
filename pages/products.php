@@ -2,13 +2,40 @@
 require_once './admin/conf.php';
 
 try {
-    $stmt = $conn->prepare("SELECT * FROM product");
-    $stmt->execute();
+    // Fetch all categories (id and name)
+    $categoryStmt = $conn->prepare("SELECT id, name FROM category");
+    $categoryStmt->execute();
+    $categories = $categoryStmt->fetchAll(PDO::FETCH_ASSOC);
+} catch (PDOException $e) {
+    die("Database error (categories): " . $e->getMessage());
+}
+
+// Get selected category id from URL, default to 0 = All categories
+$selectedCategoryId = isset($_GET['category_id']) ? intval($_GET['category_id']) : 0;
+
+// Fetch products based on selected category_id
+try {
+    if ($selectedCategoryId > 0) {
+        $stmt = $conn->prepare("SELECT * FROM product WHERE category_id = :category_id");
+        $stmt->execute(['category_id' => $selectedCategoryId]);
+    } else {
+        $stmt = $conn->prepare("SELECT * FROM product");
+        $stmt->execute();
+    }
     $products = $stmt->fetchAll(PDO::FETCH_ASSOC);
 } catch (PDOException $e) {
-    die("Database error: " . $e->getMessage());
+    die("Database error (products): " . $e->getMessage());
+}
+
+// Helper function to get category name by id
+function getCategoryName($categories, $id) {
+    foreach ($categories as $cat) {
+        if ($cat['id'] == $id) return $cat['name'];
+    }
+    return "Unknown";
 }
 ?>
+
 <style>
     .shoes-item {
         height: 100%;
@@ -72,59 +99,84 @@ try {
         pointer-events: auto;
         transform: translateY(0);
     }
+
+    /* Category buttons */
+    .category-filter {
+        margin-bottom: 1.5rem;
+        text-align: center;
+    }
+
+    .category-filter a {
+        margin: 0 0.3rem;
+        padding: 0.4rem 1rem;
+        border: 1.5px solid #81C408;
+        border-radius: 25px;
+        text-decoration: none;
+        color: #81C408;
+        font-weight: 600;
+        transition: all 0.3s ease;
+        display: inline-block;
+    }
+
+    .category-filter a.active,
+    .category-filter a:hover {
+        background-color: #81C408;
+        color: white;
+    }
 </style>
-
-<!-- Toast -->
-<div id="toast"></div>
-
-<!-- Shoes Shop Start -->
 <div class="container-fluid shoes py-5">
     <div class="container py-5">
         <h1 class="mb-4">Shoes shop</h1>
-        <div class="row g-4">
-            <div class="col-lg-12">
-                <div class="row g-4 justify-content-center">
-                    <?php foreach ($products as $product): ?>
-                        <div class="col-md-6 col-lg-6 col-xl-4">
-                            <div class="rounded position-relative shoes-item">
-                                <a href="index.php?p=shop-detail&id=<?= $product['id'] ?>" class="text-decoration-none text-dark">
-                                    <div class="shoes-img">
-                                        <img src="admin/uploaded_img/<?= htmlspecialchars($product['image']) ?>" 
-                                             class="img-fluid w-100 rounded-top" 
-                                             alt="<?= htmlspecialchars($product['name']) ?>">
-                                    </div>
-                                    <div class="text-white bg-secondary px-3 py-1 rounded position-absolute" style="top: 10px; left: 10px;">
-                                        <?= htmlspecialchars($product['category'] ?? 'Shoes') ?>
-                                    </div>
-                                </a>
-                                <div class="p-4 border border-secondary border-top-0 rounded-bottom">
-                                    <h4><?= htmlspecialchars($product['name']) ?></h4>
-                                    <p><?= htmlspecialchars($product['description'] ?? 'No description available.') ?></p>
-                                    <div class="d-flex justify-content-between flex-lg-wrap align-items-center">
-                                        <p class="text-dark fs-5 fw-bold mb-0">$<?= number_format($product['price'], 2) ?> / kg</p>
-                                        
-                                        <!-- Add to Cart Form -->
-                                        <form class="addToCartForm" method="POST">
-                                            <input type="hidden" name="product_id" value="<?= $product['id'] ?>">
-                                            <button type="submit" class="btn border border-secondary rounded-pill px-3 text-primary">
-                                                <i class="fa fa-shopping-bag me-2 text-primary"></i> Add to cart
-                                            </button>
-                                        </form>
-                                    </div>
-                                </div>
+
+        <!-- Category Filter -->
+        <div class="category-filter">
+            <a href="index.php?p=shop&category_id=0" class="<?= $selectedCategoryId === 0 ? 'active' : '' ?>">All</a>
+            <?php foreach ($categories as $category): ?>
+                <a href="index.php?p=shop&category_id=<?= $category['id'] ?>" 
+                   class="<?= $selectedCategoryId === intval($category['id']) ? 'active' : '' ?>">
+                   <?= htmlspecialchars($category['name']) ?>
+                </a>
+            <?php endforeach; ?>
+        </div>
+
+        <div class="row g-4 justify-content-center">
+            <?php foreach ($products as $product): ?>
+                <div class="col-md-6 col-lg-6 col-xl-4">
+                    <div class="rounded position-relative shoes-item">
+                        <a href="index.php?p=shop-detail&id=<?= $product['id'] ?>" class="text-decoration-none text-dark">
+                            <div class="shoes-img">
+                                <img src="admin/uploaded_img/<?= htmlspecialchars($product['image']) ?>" 
+                                     class="img-fluid w-100 rounded-top" 
+                                     alt="<?= htmlspecialchars($product['name']) ?>">
+                            </div>
+                            <div class="text-white bg-secondary px-3 py-1 rounded position-absolute" style="top: 10px; left: 10px;">
+                                <?= htmlspecialchars(getCategoryName($categories, $product['category_id'])) ?>
+                            </div>
+                        </a>
+                        <div class="p-4 border border-secondary border-top-0 rounded-bottom">
+                            <h4><?= htmlspecialchars($product['name']) ?></h4>
+                            <p><?= htmlspecialchars($product['featured'] ?? '') ?></p>
+                            <div class="d-flex justify-content-between flex-lg-wrap align-items-center">
+                                <p class="text-dark fs-5 fw-bold mb-0">$<?= number_format($product['price'], 2) ?></p>
+
+                                <form class="addToCartForm" method="POST">
+                                    <input type="hidden" name="product_id" value="<?= $product['id'] ?>">
+                                    <button type="submit" class="btn border border-secondary rounded-pill px-3 text-primary">
+                                        <i class="fa fa-shopping-bag me-2 text-primary"></i> Add to cart
+                                    </button>
+                                </form>
                             </div>
                         </div>
-                    <?php endforeach; ?>
-
-                    <?php if (count($products) === 0): ?>
-                        <p class="text-center text-muted">No products found.</p>
-                    <?php endif; ?>
+                    </div>
                 </div>
-            </div>
+            <?php endforeach; ?>
+
+            <?php if (count($products) === 0): ?>
+                <p class="text-center text-muted">No products found.</p>
+            <?php endif; ?>
         </div>
     </div>
 </div>
-<!-- Shoes Shop End -->
 
 <script>
     // Toast Notification

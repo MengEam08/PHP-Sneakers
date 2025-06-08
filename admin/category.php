@@ -178,15 +178,50 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['add_category'])) {
               echo '<tr>';
               echo '<td>' . htmlspecialchars($row['name']) . '</td>';
               echo '<td><img src="uploaded_img/' . htmlspecialchars($row['image']) . '" width="50" height="50" alt="Category Image"></td>';
-              echo '<td><a href="admin_page.php?delete=' . $row['id'] . '" class="btn-delete" onclick="return confirm(\'Are you sure?\')"><ion-icon name="trash-bin-outline"></ion-icon></a></td>';
+              echo '<td>
+                      <a href="#" class="delete-btn" data-id="' . $row['id'] . '">
+                        <ion-icon name="trash-bin-outline"></ion-icon>
+                      </a>
+                    </td>';
               echo '</tr>';
           }
           ?>
         </tbody>
+
       </table>
     </div>
   </div>
 </div>
+<script>
+document.addEventListener('DOMContentLoaded', () => {
+  document.querySelectorAll('.delete-btn').forEach(btn => {
+    btn.addEventListener('click', function (e) {
+      e.preventDefault();
+
+      if (!confirm("Are you sure you want to delete this category?")) return;
+
+      const categoryId = this.dataset.id;
+
+      fetch('delete_category.php', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+        body: 'delete_id=' + encodeURIComponent(categoryId)
+      })
+      .then(res => res.json())
+      .then(data => {
+        if (data.success) {
+          alert('Category deleted!');
+          const row = this.closest('tr');
+          if (row) row.remove();
+        } else {
+          alert(data.message || 'Failed to delete category.');
+        }
+      })
+      .catch(() => alert('Something went wrong.'));
+    });
+  });
+});
+</script>
 
 </body>
 </html>

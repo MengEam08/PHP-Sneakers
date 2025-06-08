@@ -1,54 +1,50 @@
-paypal.Buttons({
-    createOrder: function (data, actions) {
-        // Set the amount dynamically (you could also pass PHP value via dataset or hidden input)
-        return actions.order.create({
-            purchase_units: [
-                {
-                    amount: {
-                        value: '<?= number_format($grandTotal, 2, '.', '') ?>', // Use PHP to inject grand total
-                        currency_code: 'USD',
+paypal
+    .Buttons({
+        createOrder: function (data, actions) {
+            // Set the amount dynamically
+            //const amount = $('#total_amount').val(); // Replace with your desired amount
+            return actions.order.create({
+                purchase_units: [
+                    {
+                        amount: {
+                            value: 5.00, // Ensure 2 decimal places
+                            currency_code: 'USD', // Change currency as needed
+                        },
                     },
-                },
-            ],
-        });
-    },
-    onApprove: function (data, actions) {
-        return actions.order.capture().then(function (details) {
-            const transaction = details.purchase_units[0].payments.captures[0];
-
-            // Send data to the server to store in DB
-            fetch('/PHP-Sneakers/functions/paypal_processor.php', {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                },
-                body: JSON.stringify({
-                    transaction_id: transaction.id,
-                    status: transaction.status,
-                    payer_email: details.payer.email_address,
-                    amount: transaction.amount.value,
-                    currency: transaction.amount.currency_code,
-                }),
-            })
-            .then(response => response.json())
-            .then(result => {
-                if (result.success) {
-                    showToast("Payment successful. Transaction ID: " + transaction.id);
-                    setTimeout(() => {
-                        window.location.href = '/PHP-Sneakers/success.php';
-                    }, 3000);
-                } else {
-                    showToast("Payment captured, but saving failed.");
-                }
-            })
-            .catch(error => {
-                console.error("Error processing PayPal payment:", error);
-                showToast("An error occurred during payment processing.");
+                ],
             });
-        });
-    },
-    onError: function (err) {
-        console.error("PayPal error:", err);
-        showToast("Payment failed. Try again.");
-    }
-}).render('#paypal-button-container');
+        },
+        onApprove: function (data, actions) {
+            // Handle when the payment is approved
+            return actions.order.capture().then(function (details) {
+                // Show a success message to the user
+                const transaction = details.purchase_units[0].payments.captures[0];
+                //alert(transaction.status + ' => ' + transaction.id)
+                //How to insert the response into the database using PHP
+                var user_id = 5; //can be dynamic incase of user sessions
+
+                $.ajax({
+                    method: "POST",
+                    url: "paypal_processor.php",
+                    data: {transaction_id: transaction.id, user: user_id, transaction_status: transaction.status},
+                    success: function(response) {
+                        if(response == 1) {
+                            alert("Payment Successfull. Transaction ID is " + transaction.id)
+                        } else {
+                            alert('Failed to process payment')
+                            console.log(response)
+                        }
+                    }
+                })
+
+                //alert('Transaction completed by ' + details.payer.name.given_name + '. Payment successful');
+            });
+        },
+        onError: function (error) {
+            // Handle errors and display an error message to the user
+            console.log(error);
+            alert(error + 'An error occurred while processing the payment. Please try again later.');
+        },
+    })
+    .render('#paypal-button-container'); 
+// Render the PayPal button in the specified container

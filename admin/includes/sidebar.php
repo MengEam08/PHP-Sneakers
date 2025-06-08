@@ -4,7 +4,7 @@
         <ul>
           <li>
             <a href="index.php">
-                <img src="imgs/admin-logo.png" class="admin-logo"alt="">
+                <img src="imgs/admin-logo.png" class="admin-logo" style="margin-left:50px">
             </a>
           </li>
 
