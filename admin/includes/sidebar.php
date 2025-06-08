@@ -43,6 +43,14 @@
               <span class="title">Category</span>
             </a>
           </li>
+        </li>
+          <li class="<?=($p=="category"?'active':'')?>">
+            <a href="index.php?p=order">
+              <span class="icon">
+              <ion-icon name="copy-outline"></ion-icon>
+              </span>
+              <span class="title">Orders</span>
+            </a>
           </li>
 
           <li>

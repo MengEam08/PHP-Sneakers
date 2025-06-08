@@ -3,8 +3,7 @@
     <div class="container py-5">
         <div class="row g-5 align-items-center">
             <div class="col-md-12 col-lg-7">
-                <h4 class="mb-3 text-secondary">100% Organic Foods</h4>
-                <h1 class="mb-5 display-3 text-primary">Organic Veggies & Fruits Foods</h1>
+                <h1 class="mb-5 display-3 text-secondary">The Best Products Quality</h1>
                 
             </div>
             <div class="col-md-12 col-lg-5">

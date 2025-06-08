@@ -24,6 +24,9 @@ if (isset($_GET['p'])) {
         case "category":
             $page = "category.php";
             break;
+        case "order":
+            $page = "order.php";
+            break;
         case "logout":
             $page = "logout.php";
             break;

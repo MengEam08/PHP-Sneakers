@@ -2,7 +2,7 @@
 require_once './admin/conf.php';
 
 try {
-    $stmt = $conn->prepare("SELECT * FROM product");
+    $stmt = $conn->prepare("SELECT * FROM product LIMIT 4");
     $stmt->execute();
     $products = $stmt->fetchAll(PDO::FETCH_ASSOC);
 } catch (PDOException $e) {

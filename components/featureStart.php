@@ -1,47 +1,44 @@
-       <!-- Featurs Start -->
-        <div class="container-fluid service py-5">
-            <div class="container py-5">
-                <div class="row g-4 justify-content-center">
-                    <div class="col-md-6 col-lg-4">
-                        <a href="#">
-                            <div class="service-item bg-secondary rounded border border-secondary">
-                                <img src="img/featur-1.jpg" class="img-fluid rounded-top w-100" alt="">
-                                <div class="px-4 rounded-bottom">
-                                    <div class="service-content bg-primary text-center p-4 rounded">
-                                        <h5 class="text-white">Fresh Apples</h5>
-                                        <h3 class="mb-0">20% OFF</h3>
-                                    </div>
-                                </div>
+<?php
+require_once './admin/conf.php'; // your DB connection file
+
+try {
+    // Fetch 3 categories from the category table
+    $stmt = $conn->prepare("SELECT id, name, image FROM category LIMIT 3");
+    $stmt->execute();
+    $categories = $stmt->fetchAll(PDO::FETCH_ASSOC);
+} catch (PDOException $e) {
+    echo "Error fetching categories: " . $e->getMessage();
+    $categories = [];
+}
+?>
+<style>
+    .service-item img {
+    height: 400px;          /* fixed image height */
+    object-fit: cover;      /* cover the image nicely */
+    flex-shrink: 0;         /* don't allow shrinking */
+    border-top-left-radius: 0.25rem;
+    border-top-right-radius: 0.25rem;
+}
+
+</style>
+<!-- Features Start -->
+<div class="container-fluid service py-5">
+    <div class="container py-5">
+        <div class="row g-4 justify-content-center">
+            <?php foreach ($categories as $category): ?>
+                <div class="col-md-6 col-lg-4">
+                    <a href="#">
+                        <div class="service-item bg-secondary rounded border border-secondary d-flex flex-column" style="height: 500px;">
+                            <img src="admin/uploaded_img/<?= htmlspecialchars($category['image']) ?>" class="img-fluid rounded-top w-100" alt="<?= htmlspecialchars($category['name']) ?>">
+                            <div class="px-4 rounded-bottom flex-grow-1 d-flex flex-column justify-content-center">
+                                <h5 class="text-white text-center"><?= htmlspecialchars($category['name']) ?></h5>
+                                <h3 class="mb-0 text-center">Free delivery</h3>
                             </div>
-                        </a>
-                    </div>
-                    <div class="col-md-6 col-lg-4">
-                        <a href="#">
-                            <div class="service-item bg-dark rounded border border-dark">
-                                <img src="img/featur-2.jpg" class="img-fluid rounded-top w-100" alt="">
-                                <div class="px-4 rounded-bottom">
-                                    <div class="service-content bg-light text-center p-4 rounded">
-                                        <h5 class="text-primary">Tasty Fruits</h5>
-                                        <h3 class="mb-0">Free delivery</h3>
-                                    </div>
-                                </div>
-                            </div>
-                        </a>
-                    </div>
-                    <div class="col-md-6 col-lg-4">
-                        <a href="#">
-                            <div class="service-item bg-primary rounded border border-primary">
-                                <img src="img/featur-3.jpg" class="img-fluid rounded-top w-100" alt="">
-                                <div class="px-4 rounded-bottom">
-                                    <div class="service-content bg-secondary text-center p-4 rounded">
-                                        <h5 class="text-white">Exotic Vegitable</h5>
-                                        <h3 class="mb-0">Discount 30$</h3>
-                                    </div>
-                                </div>
-                            </div>
-                        </a>
-                    </div>
+                        </div>
+                    </a>
                 </div>
-            </div>
+            <?php endforeach; ?>
         </div>
-        <!-- Featurs End -->
+    </div>
+</div>
+<!-- Features End -->

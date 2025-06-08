@@ -9,7 +9,5 @@
     <?php include './components/featureStart.php'; ?>
     <?php include './components/bannerSection.php'; ?>
     <?php include './components/content.php'; ?>
-    
-
 </body>
 </html>

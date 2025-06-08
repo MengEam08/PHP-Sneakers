@@ -29,14 +29,14 @@
                                 <i class="fas fa-map-marker-alt fa-2x text-primary me-4"></i>
                                 <div>
                                     <h4>Address</h4>
-                                    <p class="mb-2">123 Street New York.USA</p>
+                                    <p class="mb-2">Cambodia</p>
                                 </div>
                             </div>
                             <div class="d-flex p-4 rounded mb-4 bg-white">
                                 <i class="fas fa-envelope fa-2x text-primary me-4"></i>
                                 <div>
                                     <h4>Mail Us</h4>
-                                    <p class="mb-2">info@example.com</p>
+                                    <p class="mb-2">Meng@example.com</p>
                                 </div>
                             </div>
                             <div class="d-flex p-4 rounded bg-white">

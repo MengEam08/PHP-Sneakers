@@ -148,6 +148,7 @@ $grandTotal = $subtotal + $shipping;
 
                     <!-- Payment Methods -->
                     <div class="row g-4 text-center align-items-center justify-content-center border-bottom py-3">
+                        <h3>Payment Methods</h3>
                         <div class="col-12">
                             <div class="form-check text-start my-3">
                                 <input type="radio" class="form-check-input bg-primary border-0" id="Delivery-1" name="payment_method" value="Cash On Delivery" required />
