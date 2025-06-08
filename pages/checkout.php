@@ -30,13 +30,14 @@ $grandTotal = $subtotal + $shipping;
 <head>
     <meta charset="UTF-8" />
     <title>Checkout</title>
-    <!-- You can include your Bootstrap CSS here -->
+    <!-- Your Bootstrap CSS -->
     <link rel="stylesheet" href="your-bootstrap.css" />
     <style>
         .main { margin-top: 60px; }
         .form-label { font-weight: bold; }
         .table th, .table td { vertical-align: middle; }
-        /* Simple toast style */
+
+        /* Toast style */
         #toast {
             visibility: hidden;
             min-width: 250px;
@@ -58,6 +59,12 @@ $grandTotal = $subtotal + $shipping;
         }
         @keyframes fadein { from {bottom: 0;opacity: 0;} to {bottom: 30px;opacity: 1;} }
         @keyframes fadeout { from {bottom: 30px;opacity: 1;} to {bottom: 0;opacity: 0;} }
+
+        /* Hide PayPal button container by default */
+        #paypal-button-container {
+            display: none;
+            margin-top: 15px;
+        }
     </style>
 </head>
 <body>
@@ -162,6 +169,8 @@ $grandTotal = $subtotal + $shipping;
                                 <input type="radio" class="form-check-input bg-primary border-0" id="Paypal-1" name="payment_method" value="Paypal" required />
                                 <label class="form-check-label" for="Paypal-1">Paypal</label>
                             </div>
+                            <!-- PayPal Button Container (hidden by default) -->
+                            <div id="paypal-button-container"></div>
                         </div>
                     </div>
 
@@ -178,11 +187,68 @@ $grandTotal = $subtotal + $shipping;
 <!-- Toast container -->
 <div id="toast"></div>
 
+<!-- PayPal SDK -->
+<script src="https://www.paypal.com/sdk/js?client-id=AaxcE-zTLDsoivpKMOD2Riu57zXt6MYxhboJV1dFEjYOSrj29WfhXcL_UXqMUJnRMSyWIlvVeqLsu6Sy&currency=USD"></script>
+
 <script>
+// PayPal Buttons render only once and stay hidden until PayPal option selected
+paypal.Buttons({
+    createOrder: function(data, actions) {
+        return actions.order.create({
+            purchase_units: [{
+                amount: {
+                    value: '<?= number_format($grandTotal, 2, '.', '') ?>'
+                }
+            }]
+        });
+    },
+    onApprove: function(data, actions) {
+        return actions.order.capture().then(function(details) {
+            alert('Transaction completed by ' + details.payer.name.given_name + '!');
+            // Optionally submit your form or do AJAX to record payment here
+            // e.g. document.getElementById('checkoutForm').submit();
+        });
+    }
+}).render('#paypal-button-container');
+</script>
+
+<script>
+document.addEventListener('DOMContentLoaded', function () {
+    const paypalRadio = document.getElementById('Paypal-1');
+    const codRadio = document.getElementById('Delivery-1');
+    const paypalContainer = document.getElementById('paypal-button-container');
+    const form = document.getElementById('checkoutForm');
+
+    function togglePaypal() {
+        paypalContainer.style.display = paypalRadio.checked ? 'block' : 'none';
+    }
+
+    paypalRadio.addEventListener('change', togglePaypal);
+    codRadio.addEventListener('change', togglePaypal);
+
+    togglePaypal();
+
+    form.addEventListener('submit', function (e) {
+        e.preventDefault();
+
+        // If PayPal selected, let PayPal handle the payment first
+        if (paypalRadio.checked) {
+            showToast("Please complete PayPal payment.");
+            return; // Prevent direct form submission
+        }
+
+        // Proceed with regular form submit (e.g., Cash on Delivery)
+        submitCheckoutForm(form);
+    });
+});
+
+// Your existing form submit handling (AJAX)
 document.getElementById('checkoutForm').addEventListener('submit', function(e) {
     e.preventDefault();
-    console.log('Form submit intercepted');
 
+    // If PayPal is selected, you might want to prevent direct form submission
+    // and rely on PayPal payment success event.
+    // For demo, this example just sends form always.
     const formData = new FormData(this);
 
     fetch('/PHP-Sneakers/functions/process_checkout.php', {
@@ -190,7 +256,6 @@ document.getElementById('checkoutForm').addEventListener('submit', function(e) {
         body: formData
     })
     .then(response => {
-        console.log('Response received', response);
         if (response.redirected) {
             window.location.href = response.url;
         } else {
@@ -199,25 +264,21 @@ document.getElementById('checkoutForm').addEventListener('submit', function(e) {
     })
     .then(data => {
         if (data) {
-            console.log('Server response:', data);
-            showToast(data, 4000);
+            showToast(data);
         }
     })
     .catch(error => {
-        console.error('Checkout failed:', error);
-        showToast("Checkout failed", 4000);
+        console.error('Error:', error);
     });
 });
 
-function showToast(msg, duration = 3000) {
-    const toast = document.getElementById("toast");
-    toast.textContent = msg;
-    toast.classList.add("show");
-    setTimeout(() => {
-        toast.classList.remove("show");
-    }, duration);
-}
+    // Simple toast function
+    function showToast(message) {
+        const toast = document.getElementById('toast');
+        toast.innerText = message;
+        toast.className = 'show';
+        setTimeout(() => { toast.className = toast.className.replace('show', ''); }, 3000);
+    }
 </script>
-
 </body>
 </html>

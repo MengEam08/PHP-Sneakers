@@ -84,7 +84,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
         $conn->commit();
 
-        header("Location: ../dashboard.php?checkout=success");
+        header("Location: ../pages/thankyou.php");
         exit;
 
     } catch (Exception $e) {
